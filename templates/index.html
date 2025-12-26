@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TITAN'S TYPING TOOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            height: 100%;
+        }
+        
+        .panel {
+            background: #fff;
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+        }
+        
+        h1 span { color: #667eea; }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            background: #fff;
+            color: #888;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover { border-color: #667eea; color: #667eea; }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-color: transparent;
+        }
+        
+        .tab-content { display: none; flex-direction: column; flex: 1; }
+        .tab-content.active { display: flex; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 15px; }
+        
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: #667eea;
+            margin-bottom: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        input[type="text"], input[type="number"], input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            background: #fafafa;
+            color: #333;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus { 
+            outline: none; 
+            border-color: #667eea;
+            background: #fff;
+        }
+        
+        input::placeholder { color: #bbb; }
+        
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        
+        .file-upload:hover { 
+            border-color: #667eea; 
+            background: #f0f0ff;
+        }
+        
+        .file-upload input { display: none; }
+        .file-upload span { color: #888; font-size: 0.85rem; font-weight: 500; }
+        
+        .btn {
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+        
+        .btn-start { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+        
+        .btn-start:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102,126,234,0.4);
+        }
+        
+        .btn-stop { 
+            background: #f5f5f5;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .btn-stop:hover { background: #fee; color: #e74c3c; }
+        
+        .btn-vc { 
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: #fff;
+        }
+        
+        .btn-vc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(17,153,142,0.4);
+        }
+        
+        .btn-vc-disconnect { 
+            background: #fee;
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        
+        .warning {
+            background: #fff8e6;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 0.7rem;
+            color: #b8860b;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* RIGHT PANEL */
+        .right-panel { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            justify-content: space-between;
+        }
+        
+        .status-badge {
+            align-self: center;
+            padding: 8px 25px;
+            border-radius: 25px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(255,255,255,0.2);
+            letter-spacing: 1px;
+        }
+        
+        .status-badge.running { 
+            background: rgba(74,222,128,0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .timer-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 5px solid rgba(255,255,255,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+        }
+        
+        .timer-circle.active { 
+            border-color: rgba(255,255,255,0.8);
+            box-shadow: 0 0 40px rgba(255,255,255,0.3);
+        }
+        
+        .timer-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .timer-label { 
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 18px 10px;
+            text-align: center;
+        }
+        
+        .stat-value { 
+            font-size: 1.8rem; 
+            font-weight: 800;
+        }
+        
+        .stat-label { 
+            font-size: 0.65rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        .progress-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 18px;
+            margin-top: 15px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .progress-bar-bg {
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #fff;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .msg-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 15px 18px;
+            margin-top: 15px;
+        }
+        
+        .msg-label { 
+            font-size: 0.65rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .msg-text { 
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .vc-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+        
+        .vc-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        
+        .vc-dot.connected { 
+            background: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+        
+        .vc-text { font-size: 0.85rem; color: #666; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1>⚡ <span>TITAN'S</span> TYPING TOOL</h1>
+            <div class="warning">⚠️ Selfbot - Against Discord TOS. Use at your own risk!</div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('typing')">⌨️ Auto Typer</button>
+                <button class="tab" onclick="switchTab('vc')">🎤 Join VC</button>
+            </div>
+            
+            <div class="tab-content active" id="typingTab">
+                <form id="typingForm">
+                    <div class="form-group">
+                        <label>🔑 Discord Token</label>
+                        <input type="password" name="token" placeholder="Paste your token here" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>📢 Channel ID</label>
+                            <input type="text" name="channel_id" placeholder="Text channel ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label>⏱️ Delay (sec)</label>
+                            <input type="number" name="delay" value="60" min="5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📄 Messages File</label>
+                        <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                            <input type="file" name="file" id="fileInput" accept=".txt" required>
+                            <span id="fileName">📁 Click to upload .txt file</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-start">🚀 Start Typing</button>
+                    <button type="button" class="btn btn-stop" id="stopBtn" style="display:none">⏹️ Stop</button>
+                </form>
+            </div>
+            
+            <div class="tab-content" id="vcTab">
+                <form id="vcForm">
+                    <div class="form-group">
+                        <label>🔑 Discord Token</label>
+                        <input type="password" name="vc_token" placeholder="Paste your token here" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>🏠 Server ID</label>
+                            <input type="text" name="guild_id" placeholder="Server ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🎤 VC Channel ID</label>
+                            <input type="text" name="vc_channel_id" placeholder="Voice channel ID" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-vc">🔊 Connect to VC</button>
+                    <button type="button" class="btn btn-vc-disconnect" id="vcDisconnectBtn" style="display:none">🔇 Disconnect</button>
+                </form>
+                
+                <div class="vc-status" id="vcStatus" style="display:none">
+                    <div class="vc-dot" id="vcDot"></div>
+                    <span class="vc-text" id="vcStatusText">Disconnected</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel right-panel">
+            <span class="status-badge" id="statusBadge">● IDLE</span>
+            
+            <div class="timer-section">
+                <div class="timer-circle" id="timerCircle">
+                    <div class="timer-number" id="timerNumber">--</div>
+                </div>
+                <div class="timer-label">Next Message In</div>
+            </div>
+            
+            <div>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-value" id="sentCount">0</div>
+                        <div class="stat-label">Sent</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="timeElapsed">0m</div>
+                        <div class="stat-label">Time</div>
+                    </div>
+                </div>
+                
+                <div class="progress-box">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+                    </div>
+                </div>
+                
+                <div class="msg-box">
+                    <div class="msg-label">Last Sent Message</div>
+                    <div class="msg-text" id="currentMsg">Waiting to start...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentJobId = null, statusInterval = null, timerInterval = null;
+        let countdown = 0, startTime = null, delay = 60;
+        let vcConnectionId = null;
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+        
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            document.getElementById('fileName').textContent = e.target.files[0]?.name ? '📄 ' + e.target.files[0].name : '📁 Click to upload';
+        });
+        
+        document.getElementById('typingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            delay = parseInt(formData.get('delay')) || 60;
+            
+            const response = await fetch('/start', { method: 'POST', body: formData });
+            const data = await response.json();
+            if (data.error) { alert(data.error); return; }
+            
+            currentJobId = data.job_id;
+            startTime = Date.now();
+            document.getElementById('totalCount').textContent = data.total_lines;
+            document.getElementById('stopBtn').style.display = 'block';
+            setStatus('running');
+            startCountdown();
+            statusInterval = setInterval(checkStatus, 1000);
+        });
+        
+        document.getElementById('stopBtn').addEventListener('click', async () => {
+            if (currentJobId) {
+                await fetch(`/stop/${currentJobId}`, { method: 'POST' });
+                clearIntervals();
+                setStatus('idle');
+                document.getElementById('stopBtn').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('vcForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = document.querySelector('[name="vc_token"]').value;
+            const guild_id = document.querySelector('[name="guild_id"]').value;
+            const channel_id = document.querySelector('[name="vc_channel_id"]').value;
+            
+            document.getElementById('vcStatus').style.display = 'flex';
+            document.getElementById('vcStatusText').textContent = 'Connecting...';
+            
+            const response = await fetch('/vc/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, guild_id, channel_id })
+            });
+            
+            const data = await response.json();
+            vcConnectionId = data.connection_id;
+            
+            if (data.status === 'connected' || data.status === 'already_connected') {
+                document.getElementById('vcDot').classList.add('connected');
+                document.getElementById('vcStatusText').textContent = 'Connected to VC';
+                document.getElementById('vcDisconnectBtn').style.display = 'block';
+            } else {
+                document.getElementById('vcStatusText').textContent = 'Failed: ' + (data.error || data.status);
+            }
+        });
+        
+        document.getElementById('vcDisconnectBtn').addEventListener('click', async () => {
+            if (vcConnectionId) {
+                await fetch('/vc/disconnect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ connection_id: vcConnectionId })
+                });
+                document.getElementById('vcDot').classList.remove('connected');
+                document.getElementById('vcStatusText').textContent = 'Disconnected';
+                document.getElementById('vcDisconnectBtn').style.display = 'none';
+            }
+        });
+        
+        function setStatus(s) {
+            const b = document.getElementById('statusBadge');
+            const c = document.getElementById('timerCircle');
+            b.className = 'status-badge' + (s === 'running' ? ' running' : '');
+            b.textContent = s === 'running' ? '● RUNNING' : '● IDLE';
+            c.classList.toggle('active', s === 'running');
+        }
+        
+        function startCountdown() {
+            countdown = delay;
+            document.getElementById('timerNumber').textContent = countdown;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                countdown = Math.max(0, countdown - 1);
+                document.getElementById('timerNumber').textContent = countdown;
+            }, 1000);
+        }
+        
+        function clearIntervals() { clearInterval(statusInterval); clearInterval(timerInterval); }
+        
+        async function checkStatus() {
+            if (!currentJobId) return;
+            const response = await fetch(`/status/${currentJobId}`);
+            const data = await response.json();
+            
+            const prevSent = parseInt(document.getElementById('sentCount').textContent);
+            document.getElementById('sentCount').textContent = data.current || 0;
+            if (data.last_message) document.getElementById('currentMsg').textContent = data.last_message;
+            
+            const pct = data.total ? Math.round((data.current / data.total) * 100) : 0;
+            document.getElementById('progressPercent').textContent = pct + '%';
+            document.getElementById('progressBar').style.width = pct + '%';
+            
+            if (startTime) {
+                const m = Math.floor((Date.now() - startTime) / 60000);
+                document.getElementById('timeElapsed').textContent = m + 'm';
+            }
+            
+            if (data.current > prevSent) countdown = delay;
+            
+            if (['completed','error','stopped'].includes(data.status)) {
+                clearIntervals();
+                setStatus('idle');
+                document.getElementById('stopBtn').style.display = 'none';
+                document.getElementById('timerNumber').textContent = '--';
+            }
+        }
+    </script>
+</body>
+</html>
